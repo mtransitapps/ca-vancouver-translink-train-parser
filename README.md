@@ -1,2 +1,4 @@
-# ca-vancouver-translink-train-parser
+ca-vancouver-translink-train-parser
+===================================
+
 Parser for Vancouver TransLink SkyTrain data
