@@ -91,26 +91,34 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	private static final String RSN_CANADA_LINE = "980";
 	private static final long RID_CANADA_LINE = 980l;
+	private static final String CANADA_LINE_SHORT_NAME = "CAN";
 	private static final String CANADA_LINE_LONG_NAME = "Canada Line";
 	private static final String CANADA_LINE_COLOR = "0098C9"; // (from PDF)
 	//
 	private static final String RSN_MILLENNIUM_LINE = "996";
 	private static final long RID_MILLENNIUM_LINE = 996l;
+	private static final String MILLENNIUM_LINE_SHORT_NAME = "MIL";
 	private static final String MILLENNIUM_LINE_LONG_NAME = "Millenium Line";
 	private static final String MILLENNIUM_LINE_COLOR = "FDD005"; // (from PDF)
 	//
 	private static final String RSN_EXPO_LINE = "999";
 	private static final long RID_EXPO_LINE = 999l;
+	private static final String EXPO_LINE_SHORT_NAME = "EXP";
 	private static final String EXPO_LINE_LONG_NAME = "Expo Line";
 	private static final String EXPO_LINE_COLOR = "1D59AF"; // (from PDF)
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
-		String routeShortName = gRoute.route_short_name; // used by real-time API
-		if (Utils.isDigitsOnly(routeShortName)) { // used by real-time API
-			routeShortName = String.valueOf(Integer.valueOf(routeShortName)); // used by real-time API
-		} // used by real-time API
-		return routeShortName; // used by real-time API
+		if (RSN_CANADA_LINE.equals(gRoute.route_short_name)) {
+			return CANADA_LINE_SHORT_NAME;
+		} else if (RSN_MILLENNIUM_LINE.equals(gRoute.route_short_name)) {
+			return MILLENNIUM_LINE_SHORT_NAME;
+		} else if (RSN_EXPO_LINE.equals(gRoute.route_short_name)) {
+			return EXPO_LINE_SHORT_NAME;
+		}
+		System.out.println("Unexpected route short name " + gRoute);
+		System.exit(-1);
+		return null;
 	}
 
 	@Override
