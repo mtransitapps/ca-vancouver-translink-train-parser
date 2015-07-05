@@ -1,6 +1,8 @@
 package org.mtransit.parser.ca_vancouver_translink_train;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -60,14 +62,18 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		return super.excludeCalendarDate(gCalendarDates);
 	}
 
-	private static final String INCLUDE_AGENCY_ID = "SKYT"; // SkyTrain only
+	private static final String RSN_CANADA_LINE = "980";
+	private static final String RSN_MILLENNIUM_LINE = "996";
+	private static final String RSN_EXPO_LINE = "999";
+
+	private static final List<String> INCLUDE_RSN = Arrays.asList(new String[] { RSN_CANADA_LINE, RSN_MILLENNIUM_LINE, RSN_EXPO_LINE });
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
-		if (!INCLUDE_AGENCY_ID.equals(gRoute.agency_id)) {
+		if (!INCLUDE_RSN.contains(gRoute.route_short_name)) {
 			return true;
 		}
-		return super.excludeRoute(gRoute);
+		return gRoute.route_type != MAgency.ROUTE_TYPE_BUS; // declared as bus but we classify it as a train
 	}
 
 	@Override
@@ -88,19 +94,16 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		return Long.parseLong(gRoute.route_short_name); // use route short name as route ID
 	}
 
-	private static final String RSN_CANADA_LINE = "980";
 	private static final long RID_CANADA_LINE = 980l;
 	private static final String CANADA_LINE_SHORT_NAME = "CAN";
 	private static final String CANADA_LINE_LONG_NAME = "Canada Line";
 	private static final String CANADA_LINE_COLOR = "0098C9"; // (from PDF)
 	//
-	private static final String RSN_MILLENNIUM_LINE = "996";
 	private static final long RID_MILLENNIUM_LINE = 996l;
 	private static final String MILLENNIUM_LINE_SHORT_NAME = "MIL";
 	private static final String MILLENNIUM_LINE_LONG_NAME = "Millenium Line";
 	private static final String MILLENNIUM_LINE_COLOR = "FDD005"; // (from PDF)
 	//
-	private static final String RSN_EXPO_LINE = "999";
 	private static final long RID_EXPO_LINE = 999l;
 	private static final String EXPO_LINE_SHORT_NAME = "EXP";
 	private static final String EXPO_LINE_LONG_NAME = "Expo Line";
