@@ -17,7 +17,7 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MSpec;
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.mt.data.MTrip;
 
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources.aspx
@@ -215,7 +215,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		tripHeadsign = STATION.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = ENDS_WITH_VIA.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = fixCase(tripHeadsign);
-		return MSpec.cleanLabel(tripHeadsign);
+		return CleanUtils.cleanLabel(tripHeadsign);
 	}
 
 	private static final Pattern VCC = Pattern.compile("(vcc)", Pattern.CASE_INSENSITIVE);
@@ -241,8 +241,8 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		gStopName = STATION_LINE.matcher(gStopName).replaceAll(StringUtils.EMPTY);
 		gStopName = PLATFORM.matcher(gStopName).replaceAll(PLATFORM_REPLACEMENT);
 		gStopName = fixCase(gStopName);
-		gStopName = MSpec.cleanStreetTypes(gStopName);
-		return MSpec.cleanLabel(gStopName);
+		gStopName = CleanUtils.cleanStreetTypes(gStopName);
+		return CleanUtils.cleanLabel(gStopName);
 	}
 
 	@Override
