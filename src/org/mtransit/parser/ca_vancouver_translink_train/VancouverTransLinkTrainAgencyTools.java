@@ -73,7 +73,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		if (!INCLUDE_RSN.contains(gRoute.route_short_name)) {
 			return true;
 		}
-		return gRoute.route_type != MAgency.ROUTE_TYPE_BUS; // declared as bus but we classify it as a train
+		return super.excludeRoute(gRoute);
 	}
 
 	@Override
