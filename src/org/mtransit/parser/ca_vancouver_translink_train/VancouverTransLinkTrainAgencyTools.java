@@ -70,7 +70,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
-		if (!INCLUDE_RSN.contains(gRoute.route_short_name)) {
+		if (!INCLUDE_RSN.contains(gRoute.getRouteShortName())) {
 			return true;
 		}
 		return super.excludeRoute(gRoute);
@@ -91,7 +91,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		return Long.parseLong(gRoute.route_short_name); // use route short name as route ID
+		return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
 	}
 
 	private static final long RID_CANADA_LINE = 980l;
@@ -111,11 +111,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
-		if (RSN_CANADA_LINE.equals(gRoute.route_short_name)) {
+		if (RSN_CANADA_LINE.equals(gRoute.getRouteShortName())) {
 			return CANADA_LINE_SHORT_NAME;
-		} else if (RSN_MILLENNIUM_LINE.equals(gRoute.route_short_name)) {
+		} else if (RSN_MILLENNIUM_LINE.equals(gRoute.getRouteShortName())) {
 			return MILLENNIUM_LINE_SHORT_NAME;
-		} else if (RSN_EXPO_LINE.equals(gRoute.route_short_name)) {
+		} else if (RSN_EXPO_LINE.equals(gRoute.getRouteShortName())) {
 			return EXPO_LINE_SHORT_NAME;
 		}
 		System.out.println("Unexpected route short name " + gRoute);
@@ -125,11 +125,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
-		if (RSN_CANADA_LINE.equals(gRoute.route_short_name)) {
+		if (RSN_CANADA_LINE.equals(gRoute.getRouteShortName())) {
 			return CANADA_LINE_LONG_NAME;
-		} else if (RSN_MILLENNIUM_LINE.equals(gRoute.route_short_name)) {
+		} else if (RSN_MILLENNIUM_LINE.equals(gRoute.getRouteShortName())) {
 			return MILLENNIUM_LINE_LONG_NAME;
-		} else if (RSN_EXPO_LINE.equals(gRoute.route_short_name)) {
+		} else if (RSN_EXPO_LINE.equals(gRoute.getRouteShortName())) {
 			return EXPO_LINE_LONG_NAME;
 		}
 		System.out.println("Unexpected route long name " + gRoute);
@@ -148,11 +148,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteColor(GRoute gRoute) {
-		if (RSN_CANADA_LINE.equals(gRoute.route_short_name)) {
+		if (RSN_CANADA_LINE.equals(gRoute.getRouteShortName())) {
 			return CANADA_LINE_COLOR;
-		} else if (RSN_MILLENNIUM_LINE.equals(gRoute.route_short_name)) {
+		} else if (RSN_MILLENNIUM_LINE.equals(gRoute.getRouteShortName())) {
 			return MILLENNIUM_LINE_COLOR;
-		} else if (RSN_EXPO_LINE.equals(gRoute.route_short_name)) {
+		} else if (RSN_EXPO_LINE.equals(gRoute.getRouteShortName())) {
 			return EXPO_LINE_COLOR;
 		}
 		System.out.println("Unexpected route color " + gRoute);
@@ -168,27 +168,27 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		if (mRoute.id == RID_CANADA_LINE) {
-			if (gTrip.direction_id == 0) {
-				mTrip.setHeadsignString(WATERFRONT, gTrip.direction_id);
+			if (gTrip.getDirectionId() == 0) {
+				mTrip.setHeadsignString(WATERFRONT, gTrip.getDirectionId());
 				return;
-			} else if (gTrip.direction_id == 1) {
-				mTrip.setHeadsignString(YVR_RICHMOND_BRIGHOUSE, gTrip.direction_id);
+			} else if (gTrip.getDirectionId() == 1) {
+				mTrip.setHeadsignString(YVR_RICHMOND_BRIGHOUSE, gTrip.getDirectionId());
 				return;
 			}
 		} else if (mRoute.id == RID_MILLENNIUM_LINE) {
-			if (gTrip.direction_id == 0) {
-				mTrip.setHeadsignString(VCC_CLARK, gTrip.direction_id);
+			if (gTrip.getDirectionId() == 0) {
+				mTrip.setHeadsignString(VCC_CLARK, gTrip.getDirectionId());
 				return;
-			} else if (gTrip.direction_id == 1) {
-				mTrip.setHeadsignString(WATERFRONT, gTrip.direction_id);
+			} else if (gTrip.getDirectionId() == 1) {
+				mTrip.setHeadsignString(WATERFRONT, gTrip.getDirectionId());
 				return;
 			}
 		} else if (mRoute.id == RID_EXPO_LINE) {
-			if (gTrip.direction_id == 0) {
-				mTrip.setHeadsignString(KING_GEORGE, gTrip.direction_id);
+			if (gTrip.getDirectionId() == 0) {
+				mTrip.setHeadsignString(KING_GEORGE, gTrip.getDirectionId());
 				return;
-			} else if (gTrip.direction_id == 1) {
-				mTrip.setHeadsignString(WATERFRONT, gTrip.direction_id);
+			} else if (gTrip.getDirectionId() == 1) {
+				mTrip.setHeadsignString(WATERFRONT, gTrip.getDirectionId());
 				return;
 			}
 		}
@@ -247,9 +247,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public int getStopId(GStop gStop) {
-		if (!StringUtils.isEmpty(gStop.stop_code) && Utils.isDigitsOnly(gStop.stop_code)) {
-			return Integer.parseInt(gStop.stop_code); // using stop code as stop ID
+		if (!StringUtils.isEmpty(gStop.getStopCode()) && Utils.isDigitsOnly(gStop.getStopCode())) {
+			return Integer.parseInt(gStop.getStopCode()); // using stop code as stop ID
 		}
-		return 1000000 + Integer.parseInt(gStop.stop_id);
+		return 1000000 + Integer.parseInt(gStop.getStopId());
 	}
 }
