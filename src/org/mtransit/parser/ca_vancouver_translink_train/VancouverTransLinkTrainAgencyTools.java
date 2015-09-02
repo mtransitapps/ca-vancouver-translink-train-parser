@@ -24,6 +24,7 @@ import org.mtransit.parser.mt.data.MTrip;
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources/GTFS-Data.aspx
 // http://mapexport.translink.bc.ca/current/google_transit.zip
 // http://ns.translink.ca/gtfs/notifications.zip
+// http://ns.translink.ca/gtfs/google_transit.zip
 public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	public static void main(String[] args) {
