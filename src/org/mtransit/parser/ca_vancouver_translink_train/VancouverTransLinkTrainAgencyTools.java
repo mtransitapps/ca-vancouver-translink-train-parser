@@ -163,29 +163,13 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	}
 
 	private static final String YVR_RICHMOND_BRIGHOUSE = "YVR / Richmond-Brighouse";
-	private static final String VCC_CLARK = "VCC–Clark";
+	private static final String VCC_CLARK = "VCC-Clark";
 	private static final String KING_GEORGE = "King George";
 	private static final String WATERFRONT = "Waterfront";
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (mRoute.id == RID_CANADA_LINE) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(WATERFRONT, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(YVR_RICHMOND_BRIGHOUSE, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.id == RID_MILLENNIUM_LINE) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(VCC_CLARK, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(WATERFRONT, gTrip.getDirectionId());
-				return;
-			}
-		} else if (mRoute.id == RID_EXPO_LINE) {
+		if (mRoute.id == RID_EXPO_LINE) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignString(KING_GEORGE, gTrip.getDirectionId());
 				return;
@@ -194,8 +178,76 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 				return;
 			}
 		}
-		System.out.printf("Unexpected trip (unexpected route ID: %s): %s\n", mRoute.id, gTrip);
+		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
+	}
+
+	private static List<String> CANADA_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront", "Bridgeport" });
+	private static List<String> CANADA_LINE_YVR_RICHMOND_BRIGHOUSE = Arrays.asList(new String[] { "YVR", "Richmond-Brighouse" });
+
+	private static List<String> MILLENNIUM_LINE_VCC_CLARK = Arrays.asList(new String[] { "VCC–Clark", "VCC-Clark", "Lougheed" });
+	private static List<String> MILLENNIUM_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront" });
+
+	private static List<String> EXPO_LINE_KING_GEORGE = Arrays.asList(new String[] { "King George" });
+	private static List<String> EXPO_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront" });
+
+	@Override
+	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
+		if (mTrip.getRouteId() == RID_CANADA_LINE) {
+			if (mTrip.getHeadsignId() == 0) {
+				if (CANADA_LINE_WATERFRONT.contains(mTrip.getHeadsignValue()) || CANADA_LINE_WATERFRONT.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(WATERFRONT, mTrip.getHeadsignId());
+					return true;
+				}
+			} else if (mTrip.getHeadsignId() == 1) {
+				if (CANADA_LINE_YVR_RICHMOND_BRIGHOUSE.contains(mTrip.getHeadsignValue())
+						|| CANADA_LINE_YVR_RICHMOND_BRIGHOUSE.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(YVR_RICHMOND_BRIGHOUSE, mTrip.getHeadsignId());
+					return true;
+				}
+			}
+			System.out.printf("\n%s: Unexpected trips to merge: %s>%s and %s>%s!", mTrip.getRouteId(), mTrip.getHeadsignId(), mTrip.getHeadsignValue(),
+					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
+			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
+			System.exit(-1);
+			return false;
+		} else if (mTrip.getRouteId() == RID_MILLENNIUM_LINE) {
+			if (mTrip.getHeadsignId() == 0) {
+				if (MILLENNIUM_LINE_VCC_CLARK.contains(mTrip.getHeadsignValue()) || MILLENNIUM_LINE_VCC_CLARK.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(VCC_CLARK, mTrip.getHeadsignId());
+					return true;
+				}
+			} else if (mTrip.getHeadsignId() == 1) {
+				if (MILLENNIUM_LINE_WATERFRONT.contains(mTrip.getHeadsignValue()) || MILLENNIUM_LINE_WATERFRONT.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(WATERFRONT, mTrip.getHeadsignId());
+					return true;
+				}
+			}
+			System.out.printf("\n%s: Unexpected trips to merge: %s>%s and %s>%s!", mTrip.getRouteId(), mTrip.getHeadsignId(), mTrip.getHeadsignValue(),
+					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
+			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
+			System.exit(-1);
+			return false;
+		} else if (mTrip.getRouteId() == RID_EXPO_LINE) {
+			if (mTrip.getHeadsignId() == 0) {
+				if (EXPO_LINE_KING_GEORGE.contains(mTrip.getHeadsignValue()) || EXPO_LINE_KING_GEORGE.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(KING_GEORGE, mTrip.getHeadsignId());
+					return true;
+				}
+			} else if (mTrip.getHeadsignId() == 1) {
+				if (EXPO_LINE_WATERFRONT.contains(mTrip.getHeadsignValue()) || EXPO_LINE_WATERFRONT.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(WATERFRONT, mTrip.getHeadsignId());
+					return true;
+				}
+			}
+			System.out.printf("\n%s: Unexpected trips to merge: %s>%s and %s>%s!", mTrip.getRouteId(), mTrip.getHeadsignId(), mTrip.getHeadsignValue(),
+					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
+			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
+			System.exit(-1);
+			return false;
+		}
+		System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 		System.exit(-1);
+		return false;
 	}
 
 	private static final Pattern STARTS_WITH_QUOTE = Pattern.compile("(^\")", Pattern.CASE_INSENSITIVE);
@@ -216,6 +268,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		tripHeadsign = SKYTRAIN_LINE_TO.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = STATION.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = ENDS_WITH_VIA.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
+		tripHeadsign = CleanUtils.CLEAN_DASHES.matcher(tripHeadsign).replaceAll(CleanUtils.CLEAN_DASHES_REPLACEMENT);
 		tripHeadsign = fixCase(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
 	}
