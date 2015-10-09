@@ -169,7 +169,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (mRoute.id == RID_EXPO_LINE) {
+		if (mRoute.getId() == RID_EXPO_LINE) {
 			if (gTrip.getDirectionId() == 0) {
 				mTrip.setHeadsignString(KING_GEORGE, gTrip.getDirectionId());
 				return;
