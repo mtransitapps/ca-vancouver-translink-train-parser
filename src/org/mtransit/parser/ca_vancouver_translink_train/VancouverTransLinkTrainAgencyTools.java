@@ -65,13 +65,17 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	}
 
 	private static final String RSN_CANADA_LINE = "980";
-	private static final String RSN_MILLENNIUM_LINE = "996";
-	private static final String RSN_EXPO_LINE = "999";
+	private static final String RSN_MILLENNIUM_LINE = "991";
+	private static final String RSN_EXPO_LINE = "992";
 
+	private static final String INCLUDE_AGENCY_ID = "SKYT"; // SkyTrain only
 	private static final List<String> INCLUDE_RSN = Arrays.asList(new String[] { RSN_CANADA_LINE, RSN_MILLENNIUM_LINE, RSN_EXPO_LINE });
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
+		if (!INCLUDE_AGENCY_ID.equals(gRoute.getAgencyId())) {
+			return true;
+		}
 		if (!INCLUDE_RSN.contains(gRoute.getRouteShortName())) {
 			return true;
 		}
@@ -101,12 +105,12 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	private static final String CANADA_LINE_LONG_NAME = "Canada Line";
 	private static final String CANADA_LINE_COLOR = "0098C9"; // (from PDF)
 	//
-	private static final long RID_MILLENNIUM_LINE = 996l;
+	private static final long RID_MILLENNIUM_LINE = 991l;
 	private static final String MILLENNIUM_LINE_SHORT_NAME = "MIL";
 	private static final String MILLENNIUM_LINE_LONG_NAME = "Millenium Line";
 	private static final String MILLENNIUM_LINE_COLOR = "FDD005"; // (from PDF)
 	//
-	private static final long RID_EXPO_LINE = 999l;
+	private static final long RID_EXPO_LINE = 992l;
 	private static final String EXPO_LINE_SHORT_NAME = "EXP";
 	private static final String EXPO_LINE_LONG_NAME = "Expo Line";
 	private static final String EXPO_LINE_COLOR = "1D59AF"; // (from PDF)
@@ -166,6 +170,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	private static final String VCC_CLARK = "VCC-Clark";
 	private static final String KING_GEORGE = "King George";
 	private static final String WATERFRONT = "Waterfront";
+	private static final String LAFARGE_LAKE_DOUGLAS = "Lafarge Lake-Douglas";
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
@@ -184,8 +189,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	private static List<String> CANADA_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront", "Bridgeport" });
 	private static List<String> CANADA_LINE_YVR_RICHMOND_BRIGHOUSE = Arrays.asList(new String[] { "YVR", "Richmond-Brighouse" });
 
-	private static List<String> MILLENNIUM_LINE_VCC_CLARK = Arrays.asList(new String[] { "VCC–Clark", "VCC-Clark", "Lougheed" });
-	private static List<String> MILLENNIUM_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront" });
+	private static List<String> MILLENNIUM_LINE_VCC_CLARK = Arrays.asList(new String[] { "VCC–Clark", "VCC-Clark" });
+
+	private static List<String> MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS = Arrays.asList(new String[] { "Lougheed", "Lougheed Town Centre", LAFARGE_LAKE_DOUGLAS });
 
 	private static List<String> EXPO_LINE_KING_GEORGE = Arrays.asList(new String[] { "King George" });
 	private static List<String> EXPO_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront" });
@@ -212,13 +218,14 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 			return false;
 		} else if (mTrip.getRouteId() == RID_MILLENNIUM_LINE) {
 			if (mTrip.getHeadsignId() == 0) {
-				if (MILLENNIUM_LINE_VCC_CLARK.contains(mTrip.getHeadsignValue()) || MILLENNIUM_LINE_VCC_CLARK.contains(mTripToMerge.getHeadsignValue())) {
-					mTrip.setHeadsignString(VCC_CLARK, mTrip.getHeadsignId());
+				if (MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS.contains(mTrip.getHeadsignValue())
+						|| MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(LAFARGE_LAKE_DOUGLAS, mTrip.getHeadsignId());
 					return true;
 				}
 			} else if (mTrip.getHeadsignId() == 1) {
-				if (MILLENNIUM_LINE_WATERFRONT.contains(mTrip.getHeadsignValue()) || MILLENNIUM_LINE_WATERFRONT.contains(mTripToMerge.getHeadsignValue())) {
-					mTrip.setHeadsignString(WATERFRONT, mTrip.getHeadsignId());
+				if (MILLENNIUM_LINE_VCC_CLARK.contains(mTrip.getHeadsignValue()) || MILLENNIUM_LINE_VCC_CLARK.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(VCC_CLARK, mTrip.getHeadsignId());
 					return true;
 				}
 			}
