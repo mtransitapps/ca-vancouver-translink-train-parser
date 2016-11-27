@@ -74,12 +74,12 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
 		if (!INCLUDE_AGENCY_ID.equals(gRoute.getAgencyId())) {
-			return true;
+			return true; // exclude
 		}
 		if (!INCLUDE_RSN.contains(gRoute.getRouteShortName())) {
-			return true;
+			return true; // exclude
 		}
-		return super.excludeRoute(gRoute);
+		return false; // keep
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		} else if (RSN_EXPO_LINE.equals(gRoute.getRouteShortName())) {
 			return EXPO_LINE_SHORT_NAME;
 		}
-		System.out.println("Unexpected route short name " + gRoute);
+		System.out.printf("\nUnexpected route short name %s!\n", gRoute);
 		System.exit(-1);
 		return null;
 	}
@@ -187,7 +187,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	}
 
 	private static List<String> CANADA_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront", "Bridgeport" });
-	private static List<String> CANADA_LINE_YVR_RICHMOND_BRIGHOUSE = Arrays.asList(new String[] { "YVR", "Richmond-Brighouse" });
+	private static List<String> CANADA_LINE_YVR_RICHMOND_BRIGHOUSE = Arrays.asList(new String[] { "YVR", "YVR-Airport", "Richmond-Brighouse" });
 
 	private static List<String> MILLENNIUM_LINE_VCC_CLARK = Arrays.asList(new String[] { "VCC–Clark", "VCC-Clark" });
 
@@ -211,9 +211,10 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 					return true;
 				}
 			}
-			System.out.printf("\n%s: Unexpected trips to merge: %s>%s and %s>%s!", mTrip.getRouteId(), mTrip.getHeadsignId(), mTrip.getHeadsignValue(),
+			System.out.printf("\n%s: Unexpected trips to merge: %s>%s & %s>%s!\n", mTrip.getRouteId(), //
+					mTrip.getHeadsignId(), mTrip.getHeadsignValue(), //
 					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
-			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
+			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
 			System.exit(-1);
 			return false;
 		} else if (mTrip.getRouteId() == RID_MILLENNIUM_LINE) {
@@ -229,9 +230,10 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 					return true;
 				}
 			}
-			System.out.printf("\n%s: Unexpected trips to merge: %s>%s and %s>%s!", mTrip.getRouteId(), mTrip.getHeadsignId(), mTrip.getHeadsignValue(),
+			System.out.printf("\n%s: Unexpected trips to merge: %s>%s & %s>%s!\n", mTrip.getRouteId(), //
+					mTrip.getHeadsignId(), mTrip.getHeadsignValue(), //
 					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
-			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
+			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
 			System.exit(-1);
 			return false;
 		} else if (mTrip.getRouteId() == RID_EXPO_LINE) {
@@ -246,13 +248,14 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 					return true;
 				}
 			}
-			System.out.printf("\n%s: Unexpected trips to merge: %s>%s and %s>%s!", mTrip.getRouteId(), mTrip.getHeadsignId(), mTrip.getHeadsignValue(),
+			System.out.printf("\n%s: Unexpected trips to merge: %s>%s & %s>%s!\n", mTrip.getRouteId(), //
+					mTrip.getHeadsignId(), mTrip.getHeadsignValue(), //
 					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
-			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
+			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
 			System.exit(-1);
 			return false;
 		}
-		System.out.printf("\n%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
+		System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
 		System.exit(-1);
 		return false;
 	}
