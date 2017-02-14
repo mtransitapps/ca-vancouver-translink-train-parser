@@ -169,20 +169,13 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	private static final String YVR_RICHMOND_BRIGHOUSE = "YVR / Richmond-Brighouse";
 	private static final String VCC_CLARK = "VCC-Clark";
 	private static final String KING_GEORGE = "King George";
+	private static final String PRODUCTION_WAY_UNIVERSITY_SHORT = "Prod Way–U";
+	private static final String KING_GEORGE_PRODUCTION_WAY_UNIVERSITY = KING_GEORGE + " / " + PRODUCTION_WAY_UNIVERSITY_SHORT;
 	private static final String WATERFRONT = "Waterfront";
 	private static final String LAFARGE_LAKE_DOUGLAS = "Lafarge Lake-Douglas";
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		if (mRoute.getId() == RID_EXPO_LINE) {
-			if (gTrip.getDirectionId() == 0) {
-				mTrip.setHeadsignString(KING_GEORGE, gTrip.getDirectionId());
-				return;
-			} else if (gTrip.getDirectionId() == 1) {
-				mTrip.setHeadsignString(WATERFRONT, gTrip.getDirectionId());
-				return;
-			}
-		}
 		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
 	}
 
@@ -193,7 +186,8 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	private static List<String> MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS = Arrays.asList(new String[] { "Lougheed", "Lougheed Town Centre", LAFARGE_LAKE_DOUGLAS });
 
-	private static List<String> EXPO_LINE_KING_GEORGE = Arrays.asList(new String[] { "King George" });
+	private static List<String> EXPO_LINE_KING_GEORGE_PRODUCTION_WAY_UNIVERSITY = Arrays.asList(new String[] { "King George", "Production Way-University",
+			PRODUCTION_WAY_UNIVERSITY_SHORT, "Edmonds", "Lougheed Town Centre" });
 	private static List<String> EXPO_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront" });
 
 	@Override
@@ -238,8 +232,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 			return false;
 		} else if (mTrip.getRouteId() == RID_EXPO_LINE) {
 			if (mTrip.getHeadsignId() == 0) {
-				if (EXPO_LINE_KING_GEORGE.contains(mTrip.getHeadsignValue()) || EXPO_LINE_KING_GEORGE.contains(mTripToMerge.getHeadsignValue())) {
-					mTrip.setHeadsignString(KING_GEORGE, mTrip.getHeadsignId());
+				if (EXPO_LINE_KING_GEORGE_PRODUCTION_WAY_UNIVERSITY.contains(mTrip.getHeadsignValue())
+						|| EXPO_LINE_KING_GEORGE_PRODUCTION_WAY_UNIVERSITY.contains(mTripToMerge.getHeadsignValue())) {
+					mTrip.setHeadsignString(KING_GEORGE_PRODUCTION_WAY_UNIVERSITY, mTrip.getHeadsignId());
 					return true;
 				}
 			} else if (mTrip.getHeadsignId() == 1) {
@@ -270,6 +265,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	private static final Pattern STATION = Pattern.compile("((^|\\W){1}(station)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
 
+	private static final Pattern PRODUCTION_WAY_UNIVERSITY_ = Pattern.compile("((^|\\W){1}(production way\\-university)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final String PRODUCTION_WAY_UNIVERSITY_REPLACEMENT = "$2" + PRODUCTION_WAY_UNIVERSITY_SHORT + "$4";
+
 	@Override
 	public String cleanTripHeadsign(String tripHeadsign) {
 		tripHeadsign = tripHeadsign.toLowerCase(Locale.ENGLISH);
@@ -278,6 +276,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		tripHeadsign = SKYTRAIN_LINE_TO.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = STATION.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
 		tripHeadsign = ENDS_WITH_VIA.matcher(tripHeadsign).replaceAll(StringUtils.EMPTY);
+		tripHeadsign = PRODUCTION_WAY_UNIVERSITY_.matcher(tripHeadsign).replaceAll(PRODUCTION_WAY_UNIVERSITY_REPLACEMENT);
 		tripHeadsign = CleanUtils.CLEAN_DASHES.matcher(tripHeadsign).replaceAll(CleanUtils.CLEAN_DASHES_REPLACEMENT);
 		tripHeadsign = fixCase(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
