@@ -64,9 +64,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		return super.excludeCalendarDate(gCalendarDates);
 	}
 
-	private static final String RSN_CANADA_LINE = "980";
-	private static final String RSN_MILLENNIUM_LINE = "991";
-	private static final String RSN_EXPO_LINE = "992";
+	private static final String RSN_CANADA_LINE = "Canada Line";
+	private static final String RSN_MILLENNIUM_LINE = "Millennium Line";
+	private static final String RSN_EXPO_LINE = "Expo Line";
 
 	private static final String INCLUDE_AGENCY_ID = "SKYT"; // SkyTrain only
 	private static final List<String> INCLUDE_RSN = Arrays.asList(new String[] { RSN_CANADA_LINE, RSN_MILLENNIUM_LINE, RSN_EXPO_LINE });
@@ -97,7 +97,21 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
+		if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
+			return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
+		}
+		if (RSN_CANADA_LINE.equals(gRoute.getRouteShortName())) {
+			return RID_CANADA_LINE;
+		}
+		if (RSN_MILLENNIUM_LINE.equals(gRoute.getRouteShortName())) {
+			return RID_MILLENNIUM_LINE;
+		}
+		if (RSN_EXPO_LINE.equals(gRoute.getRouteShortName())) {
+			return RID_EXPO_LINE;
+		}
+		System.out.printf("\nUnexpected route ID for %s!\n", gRoute);
+		System.exit(-1);
+		return -1l;
 	}
 
 	private static final long RID_CANADA_LINE = 980l;
