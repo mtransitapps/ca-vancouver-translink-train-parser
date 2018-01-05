@@ -64,9 +64,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		return super.excludeCalendarDate(gCalendarDates);
 	}
 
-	private static final String RSN_CANADA_LINE = "Canada Line";
-	private static final String RSN_MILLENNIUM_LINE = "Millennium Line";
-	private static final String RSN_EXPO_LINE = "Expo Line";
+	private static final String RSN_CANADA_LINE = "980"; // "Canada Line";
+	private static final String RSN_MILLENNIUM_LINE = "991"; // "Millennium Line";
+	private static final String RSN_EXPO_LINE = "992"; // "Expo Line";
 
 	private static final String INCLUDE_AGENCY_ID = "SKYT"; // SkyTrain only
 	private static final List<String> INCLUDE_RSN = Arrays.asList(new String[] { RSN_CANADA_LINE, RSN_MILLENNIUM_LINE, RSN_EXPO_LINE });
