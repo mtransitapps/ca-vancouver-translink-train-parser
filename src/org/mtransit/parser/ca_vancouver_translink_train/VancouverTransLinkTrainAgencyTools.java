@@ -75,7 +75,6 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 			"992", "Expo Line", //
 			});
 
-	private static final String INCLUDE_AGENCY_ID = "SKYT"; // SkyTrain only
 	private static final List<String> INCLUDE_RSN;
 	static {
 		List<String> list = new ArrayList<String>();
@@ -87,9 +86,6 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
-		if (!INCLUDE_AGENCY_ID.equals(gRoute.getAgencyId())) {
-			return true; // exclude
-		}
 		if (!INCLUDE_RSN.contains(gRoute.getRouteShortName())) {
 			return true; // exclude
 		}
