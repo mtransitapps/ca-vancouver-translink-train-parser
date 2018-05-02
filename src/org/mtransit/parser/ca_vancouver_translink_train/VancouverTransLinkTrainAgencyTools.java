@@ -66,13 +66,13 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	}
 
 	private static final List<String> RSN_CANADA_LINE = Arrays.asList(new String[] { //
-			"980", "Canada Line", //
+			"980", "Canada Line", "CANADA LINE SKYTRAIN", //
 			});
 	private static final List<String> RSN_MILLENNIUM_LINE = Arrays.asList(new String[] { //
-			"991", "Millennium Line", //
+			"991", "Millennium Line", "MILLENNIUM SKYTRAIN", //
 			});
 	private static final List<String> RSN_EXPO_LINE = Arrays.asList(new String[] { //
-			"992", "Expo Line", //
+			"992", "Expo Line", "EXPO SKYTRAIN", //
 			});
 
 	private static final List<String> INCLUDE_RSN;
