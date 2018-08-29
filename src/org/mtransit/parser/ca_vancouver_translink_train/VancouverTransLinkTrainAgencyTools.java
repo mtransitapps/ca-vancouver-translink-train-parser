@@ -80,6 +80,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 			"992", "Expo Line", "EXPO SKYTRAIN", //
 			});
 
+	private boolean isRoute(GRoute gRoute, List<String> rsns) {
+		return rsns.contains(gRoute.getRouteShortName()) //
+				|| rsns.contains(gRoute.getRouteLongName());
+	}
+
 	private static final List<String> INCLUDE_RSN;
 	static {
 		List<String> list = new ArrayList<String>();
@@ -91,7 +96,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public boolean excludeRoute(GRoute gRoute) {
-		if (!INCLUDE_RSN.contains(gRoute.getRouteShortName())) {
+		if (!isRoute(gRoute, INCLUDE_RSN)) {
 			return true; // exclude
 		}
 		return false; // keep
@@ -112,16 +117,17 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
+		if (!StringUtils.isEmpty(gRoute.getRouteShortName()) //
+				&& Utils.isDigitsOnly(gRoute.getRouteShortName())) {
 			return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
 		}
-		if (RSN_CANADA_LINE.contains(gRoute.getRouteShortName())) {
+		if (isRoute(gRoute, RSN_CANADA_LINE)) {
 			return RID_CANADA_LINE;
 		}
-		if (RSN_MILLENNIUM_LINE.contains(gRoute.getRouteShortName())) {
+		if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
 			return RID_MILLENNIUM_LINE;
 		}
-		if (RSN_EXPO_LINE.contains(gRoute.getRouteShortName())) {
+		if (isRoute(gRoute, RSN_EXPO_LINE)) {
 			return RID_EXPO_LINE;
 		}
 		System.out.printf("\nUnexpected route ID for %s!\n", gRoute);
@@ -147,11 +153,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	@Override
 	public String getRouteShortName(GRoute gRoute) {
 		// REAL-TIME API IS FOR BUS ONLY
-		if (RSN_CANADA_LINE.contains(gRoute.getRouteShortName())) {
+		if (isRoute(gRoute, RSN_CANADA_LINE)) {
 			return CANADA_LINE_SHORT_NAME;
-		} else if (RSN_MILLENNIUM_LINE.contains(gRoute.getRouteShortName())) {
+		} else if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
 			return MILLENNIUM_LINE_SHORT_NAME;
-		} else if (RSN_EXPO_LINE.contains(gRoute.getRouteShortName())) {
+		} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
 			return EXPO_LINE_SHORT_NAME;
 		}
 		System.out.printf("\nUnexpected route short name %s!\n", gRoute);
@@ -161,11 +167,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
-		if (RSN_CANADA_LINE.contains(gRoute.getRouteShortName())) {
+		if (isRoute(gRoute, RSN_CANADA_LINE)) {
 			return CANADA_LINE_LONG_NAME;
-		} else if (RSN_MILLENNIUM_LINE.contains(gRoute.getRouteShortName())) {
+		} else if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
 			return MILLENNIUM_LINE_LONG_NAME;
-		} else if (RSN_EXPO_LINE.contains(gRoute.getRouteShortName())) {
+		} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
 			return EXPO_LINE_LONG_NAME;
 		}
 		System.out.println("Unexpected route long name " + gRoute);
@@ -184,11 +190,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteColor(GRoute gRoute) {
-		if (RSN_CANADA_LINE.contains(gRoute.getRouteShortName())) {
+		if (isRoute(gRoute, RSN_CANADA_LINE)) {
 			return CANADA_LINE_COLOR;
-		} else if (RSN_MILLENNIUM_LINE.contains(gRoute.getRouteShortName())) {
+		} else if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
 			return MILLENNIUM_LINE_COLOR;
-		} else if (RSN_EXPO_LINE.contains(gRoute.getRouteShortName())) {
+		} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
 			return EXPO_LINE_COLOR;
 		}
 		System.out.println("Unexpected route color " + gRoute);
