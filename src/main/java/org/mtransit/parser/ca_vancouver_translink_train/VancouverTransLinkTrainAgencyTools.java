@@ -1,14 +1,9 @@
 package org.mtransit.parser.ca_vancouver_translink_train;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
+import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
@@ -18,8 +13,15 @@ import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
 import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.mt.data.MTrip;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources.aspx
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources/GTFS-Data.aspx
@@ -43,11 +45,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public void start(String[] args) {
-		System.out.printf("\nGenerating TransLink train data...");
+		MTLog.log("Generating TransLink train data...");
 		long start = System.currentTimeMillis();
-		this.serviceIds = extractUsefulServiceIds(args, this);
+		this.serviceIds = extractUsefulServiceIds(args, this, true);
 		super.start(args);
-		System.out.printf("\nGenerating TransLink train data... DONE in %s.\n", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+		MTLog.log("Generating TransLink train data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@Override
@@ -71,15 +73,15 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		return super.excludeCalendarDate(gCalendarDates);
 	}
 
-	private static final List<String> RSN_CANADA_LINE = Arrays.asList(new String[] { //
-			"980", "Canada Line", "CANADA LINE SKYTRAIN", //
-			});
-	private static final List<String> RSN_MILLENNIUM_LINE = Arrays.asList(new String[] { //
-			"991", "Millennium Line", "MILLENNIUM SKYTRAIN", //
-			});
-	private static final List<String> RSN_EXPO_LINE = Arrays.asList(new String[] { //
-			"992", "Expo Line", "EXPO SKYTRAIN", //
-			});
+	private static final List<String> RSN_CANADA_LINE = Arrays.asList(//
+			"980", "Canada Line", "CANADA LINE SKYTRAIN" //
+	);
+	private static final List<String> RSN_MILLENNIUM_LINE = Arrays.asList(//
+			"991", "Millennium Line", "MILLENNIUM SKYTRAIN" //
+	);
+	private static final List<String> RSN_EXPO_LINE = Arrays.asList(//
+			"992", "Expo Line", "EXPO SKYTRAIN" //
+	);
 
 	private boolean isRoute(GRoute gRoute, List<String> rsns) {
 		return rsns.contains(gRoute.getRouteShortName()) //
@@ -87,8 +89,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	}
 
 	private static final List<String> INCLUDE_RSN;
+
 	static {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		list.addAll(RSN_CANADA_LINE);
 		list.addAll(RSN_MILLENNIUM_LINE);
 		list.addAll(RSN_EXPO_LINE);
@@ -118,35 +121,24 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		if (!StringUtils.isEmpty(gRoute.getRouteShortName()) //
-				&& Utils.isDigitsOnly(gRoute.getRouteShortName())) {
-			return Long.parseLong(gRoute.getRouteShortName()); // use route short name as route ID
-		}
-		if (isRoute(gRoute, RSN_CANADA_LINE)) {
-			return RID_CANADA_LINE;
-		}
-		if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
-			return RID_MILLENNIUM_LINE;
-		}
-		if (isRoute(gRoute, RSN_EXPO_LINE)) {
-			return RID_EXPO_LINE;
-		}
-		System.out.printf("\nUnexpected route ID for %s!\n", gRoute);
-		System.exit(-1);
-		return -1l;
+		// TODO export original route ID
+		return super.getRouteId(gRoute); // useful to match with GTFS real-time
 	}
 
-	private static final long RID_CANADA_LINE = 980l;
+	@SuppressWarnings("unused")
+	private static final long RID_CANADA_LINE = 980L;
 	private static final String CANADA_LINE_SHORT_NAME = "CAN";
 	private static final String CANADA_LINE_LONG_NAME = "Canada Line";
 	private static final String CANADA_LINE_COLOR = "0098C9"; // (from PDF)
 	//
-	private static final long RID_MILLENNIUM_LINE = 991l;
+	@SuppressWarnings("unused")
+	private static final long RID_MILLENNIUM_LINE = 991L;
 	private static final String MILLENNIUM_LINE_SHORT_NAME = "MIL";
 	private static final String MILLENNIUM_LINE_LONG_NAME = "Millenium Line";
 	private static final String MILLENNIUM_LINE_COLOR = "FDD005"; // (from PDF)
 	//
-	private static final long RID_EXPO_LINE = 992l;
+	@SuppressWarnings("unused")
+	private static final long RID_EXPO_LINE = 992L;
 	private static final String EXPO_LINE_SHORT_NAME = "EXP";
 	private static final String EXPO_LINE_LONG_NAME = "Expo Line";
 	private static final String EXPO_LINE_COLOR = "1D59AF"; // (from PDF)
@@ -161,8 +153,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
 			return EXPO_LINE_SHORT_NAME;
 		}
-		System.out.printf("\nUnexpected route short name %s!\n", gRoute);
-		System.exit(-1);
+		MTLog.logFatal("Unexpected route short name %s!", gRoute);
 		return null;
 	}
 
@@ -175,8 +166,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
 			return EXPO_LINE_LONG_NAME;
 		}
-		System.out.println("Unexpected route long name " + gRoute);
-		System.exit(-1);
+		MTLog.logFatal("Unexpected route long name " + gRoute);
 		return null;
 	}
 
@@ -198,8 +188,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
 			return EXPO_LINE_COLOR;
 		}
-		System.out.println("Unexpected route color " + gRoute);
-		System.exit(-1);
+		MTLog.logFatal("Unexpected route color " + gRoute);
 		return null;
 	}
 
@@ -216,20 +205,20 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
 	}
 
-	private static List<String> CANADA_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront", "Bridgeport" });
-	private static List<String> CANADA_LINE_YVR_RICHMOND_BRIGHOUSE = Arrays.asList(new String[] { "YVR", "YVR-Airport", "Richmond-Brighouse" });
+	private static List<String> CANADA_LINE_WATERFRONT = Arrays.asList("Waterfront", "Bridgeport");
+	private static List<String> CANADA_LINE_YVR_RICHMOND_BRIGHOUSE = Arrays.asList("YVR", "YVR-Airport", "Richmond-Brighouse");
 
-	private static List<String> MILLENNIUM_LINE_VCC_CLARK = Arrays.asList(new String[] { "VCC–Clark", "VCC-Clark" });
+	private static List<String> MILLENNIUM_LINE_VCC_CLARK = Arrays.asList("VCC–Clark", "VCC-Clark");
 
-	private static List<String> MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS = Arrays.asList(new String[] { "Lougheed", "Lougheed Town Centre", LAFARGE_LAKE_DOUGLAS });
+	private static List<String> MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS = Arrays.asList("Lougheed", "Lougheed Town Centre", LAFARGE_LAKE_DOUGLAS);
 
-	private static List<String> EXPO_LINE_KING_GEORGE_PRODUCTION_WAY_UNIVERSITY = Arrays.asList(new String[] { "King George", "Production Way-University",
-			PRODUCTION_WAY_UNIVERSITY_SHORT, "Edmonds", "Lougheed Town Centre" });
-	private static List<String> EXPO_LINE_WATERFRONT = Arrays.asList(new String[] { "Waterfront" });
+	private static List<String> EXPO_LINE_KING_GEORGE_PRODUCTION_WAY_UNIVERSITY = Arrays.asList("King George", "Production Way-University",
+			PRODUCTION_WAY_UNIVERSITY_SHORT, "Edmonds", "Lougheed Town Centre");
+	private static List<String> EXPO_LINE_WATERFRONT = Collections.singletonList("Waterfront");
 
 	@Override
 	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
-		if (mTrip.getRouteId() == RID_CANADA_LINE) {
+		if (mTrip.getRouteId() == 13686L) { // RID_CANADA_LINE
 			if (mTrip.getHeadsignId() == 0) {
 				if (CANADA_LINE_WATERFRONT.contains(mTrip.getHeadsignValue()) || CANADA_LINE_WATERFRONT.contains(mTripToMerge.getHeadsignValue())) {
 					mTrip.setHeadsignString(WATERFRONT, mTrip.getHeadsignId());
@@ -242,13 +231,12 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 					return true;
 				}
 			}
-			System.out.printf("\n%s: Unexpected trips to merge: %s>%s & %s>%s!\n", mTrip.getRouteId(), //
+			MTLog.log("%s: Unexpected trips to merge: %s>%s & %s>%s!", mTrip.getRouteId(), //
 					mTrip.getHeadsignId(), mTrip.getHeadsignValue(), //
 					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
-			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
-			System.exit(-1);
+			MTLog.logFatal("%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 			return false;
-		} else if (mTrip.getRouteId() == RID_MILLENNIUM_LINE) {
+		} else if (mTrip.getRouteId() == 30052L) { // RID_MILLENNIUM_LINE
 			if (mTrip.getHeadsignId() == 0) {
 				if (MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS.contains(mTrip.getHeadsignValue())
 						|| MILLENNIUM_LINE_LAFARGE_LAKE_DOUGLAS.contains(mTripToMerge.getHeadsignValue())) {
@@ -261,13 +249,12 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 					return true;
 				}
 			}
-			System.out.printf("\n%s: Unexpected trips to merge: %s>%s & %s>%s!\n", mTrip.getRouteId(), //
+			MTLog.log("%s: Unexpected trips to merge: %s>%s & %s>%s!", mTrip.getRouteId(), //
 					mTrip.getHeadsignId(), mTrip.getHeadsignValue(), //
 					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
-			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
-			System.exit(-1);
+			MTLog.logFatal("%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 			return false;
-		} else if (mTrip.getRouteId() == RID_EXPO_LINE) {
+		} else if (mTrip.getRouteId() == 30053L) { // RID_EXPO_LINE
 			if (mTrip.getHeadsignId() == 0) {
 				if (EXPO_LINE_KING_GEORGE_PRODUCTION_WAY_UNIVERSITY.contains(mTrip.getHeadsignValue())
 						|| EXPO_LINE_KING_GEORGE_PRODUCTION_WAY_UNIVERSITY.contains(mTripToMerge.getHeadsignValue())) {
@@ -280,15 +267,13 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 					return true;
 				}
 			}
-			System.out.printf("\n%s: Unexpected trips to merge: %s>%s & %s>%s!\n", mTrip.getRouteId(), //
+			MTLog.log("%s: Unexpected trips to merge: %s>%s & %s>%s!", mTrip.getRouteId(), //
 					mTrip.getHeadsignId(), mTrip.getHeadsignValue(), //
 					mTripToMerge.getHeadsignId(), mTripToMerge.getHeadsignValue());
-			System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
-			System.exit(-1);
+			MTLog.logFatal("%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 			return false;
 		}
-		System.out.printf("\n%s: Unexpected trips to merge: %s and %s!\n", mTrip.getRouteId(), mTrip, mTripToMerge);
-		System.exit(-1);
+		MTLog.logFatal("%s: Unexpected trips to merge: %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 		return false;
 	}
 
@@ -296,13 +281,13 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	private static final Pattern ENDS_WITH_QUOTE = Pattern.compile("(\"[;]?$)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern SKYTRAIN_LINE_TO = Pattern.compile("((skytrain )?(\\- platform sign )?([\\w]* line )?to )", Pattern.CASE_INSENSITIVE);
+	private static final Pattern SKYTRAIN_LINE_TO = Pattern.compile("((skytrain )?(- platform sign )?([\\w]* line )?to )", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern ENDS_WITH_VIA = Pattern.compile("(via.*$)", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern STATION = Pattern.compile("((^|\\W){1}(station)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final Pattern STATION = Pattern.compile("((^|\\W)(station)(\\W|$))", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PRODUCTION_WAY_UNIVERSITY_ = Pattern.compile("((^|\\W){1}(production way\\-university)(\\W|$){1})", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PRODUCTION_WAY_UNIVERSITY_ = Pattern.compile("((^|\\W)(production way-university)(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PRODUCTION_WAY_UNIVERSITY_REPLACEMENT = "$2" + PRODUCTION_WAY_UNIVERSITY_SHORT + "$4";
 
 	@Override
@@ -348,9 +333,6 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public int getStopId(GStop gStop) {
-		if (!StringUtils.isEmpty(gStop.getStopCode()) && Utils.isDigitsOnly(gStop.getStopCode())) {
-			return Integer.parseInt(gStop.getStopCode()); // using stop code as stop ID
-		}
-		return 1000000 + Integer.parseInt(gStop.getStopId());
+		return super.getStopId(gStop); // using stop ID as stop code (useful to match with GTFS real-time)
 	}
 }
