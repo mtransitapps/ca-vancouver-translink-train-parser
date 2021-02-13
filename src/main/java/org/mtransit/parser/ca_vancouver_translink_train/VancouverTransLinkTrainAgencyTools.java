@@ -1,9 +1,9 @@
 package org.mtransit.parser.ca_vancouver_translink_train;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mtransit.parser.CleanUtils;
+import org.mtransit.commons.CleanUtils;
+import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Utils;
@@ -178,7 +178,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	private static final Pattern SKY_TRAIN_ = CleanUtils.cleanWords("skytrain");
 
-	private String cleanRouteLongName(@NotNull String routeLongName) {
+	@NotNull
+	@Override
+	public String cleanRouteLongName(@NotNull String routeLongName) {
 		routeLongName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, routeLongName, getIgnoredWords());
 		routeLongName = SKY_TRAIN_.matcher(routeLongName).replaceAll(EMPTY);
 		return CleanUtils.cleanLabel(routeLongName);
