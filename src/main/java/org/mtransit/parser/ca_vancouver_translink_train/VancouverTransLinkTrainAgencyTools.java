@@ -2,24 +2,17 @@ package org.mtransit.parser.ca_vancouver_translink_train;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CleanUtils;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
-import org.mtransit.parser.Utils;
-import org.mtransit.parser.gtfs.data.GCalendar;
-import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GRoute;
-import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
-import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
-import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MTrip;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -34,47 +27,19 @@ import static org.mtransit.parser.StringUtils.EMPTY;
 // http://gtfs.translink.ca/static/latest
 public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
-	public static void main(@Nullable String[] args) {
-		if (args == null || args.length == 0) {
-			args = new String[3];
-			args[0] = "input/gtfs.zip";
-			args[1] = "../../mtransitapps/ca-vancouver-translink-train-android/res/raw/";
-			args[2] = ""; // files-prefix
-		}
+	public static void main(@NotNull String[] args) {
 		new VancouverTransLinkTrainAgencyTools().start(args);
 	}
 
-	@Nullable
-	private HashSet<Integer> serviceIdInts;
-
+	@NotNull
 	@Override
-	public void start(@NotNull String[] args) {
-		MTLog.log("Generating TransLink train data...");
-		long start = System.currentTimeMillis();
-		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true);
-		super.start(args);
-		MTLog.log("Generating TransLink train data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+	public String getAgencyName() {
+		return "TransLink";
 	}
 
 	@Override
-	public boolean excludingAll() {
-		return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
-	}
-
-	@Override
-	public boolean excludeCalendar(@NotNull GCalendar gCalendar) {
-		if (this.serviceIdInts != null) {
-			return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
-		}
-		return super.excludeCalendar(gCalendar);
-	}
-
-	@Override
-	public boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDates) {
-		if (this.serviceIdInts != null) {
-			return excludeUselessCalendarDateInt(gCalendarDates, this.serviceIdInts);
-		}
-		return super.excludeCalendarDate(gCalendarDates);
+	public boolean defaultExcludeEnabled() {
+		return true;
 	}
 
 	private static final List<String> RSN_CANADA_LINE = Arrays.asList(//
@@ -87,7 +52,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 			"992", "Expo Line", "EXPO SKYTRAIN" //
 	);
 
-	private boolean isRoute(GRoute gRoute, List<String> rsns) {
+	private boolean isRoute(@NotNull GRoute gRoute, @NotNull List<String> rsns) {
 		return rsns.contains(gRoute.getRouteShortName()) //
 				|| rsns.contains(gRoute.getRouteLongName());
 	}
@@ -109,14 +74,6 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 			return true; // exclude
 		}
 		return false; // keep
-	}
-
-	@Override
-	public boolean excludeTrip(@NotNull GTrip gTrip) {
-		if (this.serviceIdInts != null) {
-			return excludeUselessTripInt(gTrip, this.serviceIdInts);
-		}
-		return super.excludeTrip(gTrip);
 	}
 
 	@NotNull
@@ -146,7 +103,8 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	@Nullable
 	@Override
 	public String getRouteShortName(@NotNull GRoute gRoute) {
-		if (gRoute.getRouteShortName().isEmpty()) {
+		if (gRoute.getRouteShortName().isEmpty()
+				|| CharUtils.isDigitsOnly(gRoute.getRouteShortName())) {
 			// REAL-TIME API IS FOR BUS ONLY
 			if (isRoute(gRoute, RSN_CANADA_LINE)) {
 				return CANADA_LINE_SHORT_NAME;
@@ -212,24 +170,9 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		return super.getRouteColor(gRoute);
 	}
 
-	private static final String PRODUCTION_WAY_UNIVERSITY_SHORT = "Prod Way–U";
-
-	@Override
-	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
-		mTrip.setHeadsignString(
-				cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
-				gTrip.getDirectionIdOrDefault()
-		);
-	}
-
 	@Override
 	public boolean directionFinderEnabled() {
 		return true;
-	}
-
-	@Override
-	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
-		throw new MTLog.Fatal("%s: Using direction finder to merge %s and %s!", mTrip.getRouteId(), mTrip, mTripToMerge);
 	}
 
 	private static final Pattern STARTS_WITH_QUOTE = Pattern.compile("(^\")", Pattern.CASE_INSENSITIVE);
@@ -240,6 +183,7 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	private static final Pattern STATION = Pattern.compile("((^|\\W)(station)(\\W|$))", Pattern.CASE_INSENSITIVE);
 
+	private static final String PRODUCTION_WAY_UNIVERSITY_SHORT = "Prod Way–U";
 	private static final Pattern PRODUCTION_WAY_UNIVERSITY_ = Pattern.compile("((^|\\W)(production way-university)(\\W|$))", Pattern.CASE_INSENSITIVE);
 	private static final String PRODUCTION_WAY_UNIVERSITY_REPLACEMENT = "$2" + PRODUCTION_WAY_UNIVERSITY_SHORT + "$4";
 
