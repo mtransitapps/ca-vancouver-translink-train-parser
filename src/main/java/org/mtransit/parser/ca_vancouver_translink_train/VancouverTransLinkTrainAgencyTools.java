@@ -1,23 +1,18 @@
 package org.mtransit.parser.ca_vancouver_translink_train;
 
+import static org.mtransit.commons.StringUtils.EMPTY;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mtransit.commons.CharUtils;
 import org.mtransit.commons.CleanUtils;
-import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
-import org.mtransit.parser.MTLog;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.mt.data.MAgency;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
-
-import static org.mtransit.parser.StringUtils.EMPTY;
 
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources.aspx
 // http://www.translink.ca/en/Schedules-and-Maps/Developer-Resources/GTFS-Data.aspx
@@ -31,6 +26,12 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		new VancouverTransLinkTrainAgencyTools().start(args);
 	}
 
+	@Nullable
+	@Override
+	public List<Locale> getSupportedLanguages() {
+		return LANG_EN;
+	}
+
 	@NotNull
 	@Override
 	public String getAgencyName() {
@@ -42,38 +43,10 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		return true;
 	}
 
-	private static final List<String> RSN_CANADA_LINE = Arrays.asList(//
-			"980", "Canada Line", "CANADA LINE SKYTRAIN" //
-	);
-	private static final List<String> RSN_MILLENNIUM_LINE = Arrays.asList(//
-			"991", "Millennium Line", "MILLENNIUM SKYTRAIN" //
-	);
-	private static final List<String> RSN_EXPO_LINE = Arrays.asList(//
-			"992", "Expo Line", "EXPO SKYTRAIN" //
-	);
-
-	private boolean isRoute(@NotNull GRoute gRoute, @NotNull List<String> rsns) {
-		return rsns.contains(gRoute.getRouteShortName()) //
-				|| rsns.contains(gRoute.getRouteLongName());
-	}
-
-	private static final List<String> INCLUDE_RSN;
-
-	static {
-		List<String> list = new ArrayList<>();
-		list.addAll(RSN_CANADA_LINE);
-		list.addAll(RSN_MILLENNIUM_LINE);
-		list.addAll(RSN_EXPO_LINE);
-		INCLUDE_RSN = list;
-	}
-
+	@NotNull
 	@Override
-	public boolean excludeRoute(@NotNull GRoute gRoute) {
-		//noinspection RedundantIfStatement
-		if (!isRoute(gRoute, INCLUDE_RSN)) {
-			return true; // exclude
-		}
-		return false; // keep
+	public Integer getOriginalAgencyRouteType() {
+		return MAgency.ROUTE_TYPE_SUBWAY; // classified as subway instead of train
 	}
 
 	@NotNull
@@ -83,55 +56,33 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 	}
 
 	@Override
-	public long getRouteId(@NotNull GRoute gRoute) {
-		// TODO export original route ID
-		return super.getRouteId(gRoute); // useful to match with GTFS real-time
+	public boolean defaultRouteIdEnabled() {
+		return true;
 	}
 
-	private static final String CANADA_LINE_SHORT_NAME = "CAN";
-	private static final String CANADA_LINE_LONG_NAME = "Canada Line";
-	private static final String CANADA_LINE_COLOR = "0098C9"; // (from PDF)
-	//
-	private static final String MILLENNIUM_LINE_SHORT_NAME = "MIL";
-	private static final String MILLENNIUM_LINE_LONG_NAME = "Millenium Line";
-	private static final String MILLENNIUM_LINE_COLOR = "FDD005"; // (from PDF)
-	//
-	private static final String EXPO_LINE_SHORT_NAME = "EXP";
-	private static final String EXPO_LINE_LONG_NAME = "Expo Line";
-	private static final String EXPO_LINE_COLOR = "1D59AF"; // (from PDF)
-
-	@Nullable
 	@Override
-	public String getRouteShortName(@NotNull GRoute gRoute) {
-		if (gRoute.getRouteShortName().isEmpty()
-				|| CharUtils.isDigitsOnly(gRoute.getRouteShortName())) {
-			// REAL-TIME API IS FOR BUS ONLY
-			if (isRoute(gRoute, RSN_CANADA_LINE)) {
-				return CANADA_LINE_SHORT_NAME;
-			} else if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
-				return MILLENNIUM_LINE_SHORT_NAME;
-			} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
-				return EXPO_LINE_SHORT_NAME;
-			}
-			throw new MTLog.Fatal("Unexpected route short name %s!", gRoute);
-		}
-		return super.getRouteShortName(gRoute);
+	public boolean useRouteShortNameForRouteId() {
+		return false; // useful to match with GTFS real-time
 	}
 
 	@NotNull
 	@Override
-	public String getRouteLongName(@NotNull GRoute gRoute) {
-		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
-			if (isRoute(gRoute, RSN_CANADA_LINE)) {
-				return CANADA_LINE_LONG_NAME;
-			} else if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
-				return MILLENNIUM_LINE_LONG_NAME;
-			} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
-				return EXPO_LINE_LONG_NAME;
-			}
-			throw new MTLog.Fatal("Unexpected route long name " + gRoute);
+	public String provideMissingRouteShortName(@NotNull GRoute gRoute) {
+		final String routeLongName = gRoute.getRouteLongNameOrDefault().toLowerCase(getFirstLanguageNN());
+		switch (routeLongName) {
+		case "canada line":
+			return "CAN";
+		case "millennium line":
+			return "MIL";
+		case "expo line":
+			return "EXP";
 		}
-		return cleanRouteLongName(super.getRouteLongName(gRoute));
+		return super.provideMissingRouteShortName(gRoute);
+	}
+
+	@Override
+	public boolean defaultRouteLongNameEnabled() {
+		return true;
 	}
 
 	private static final Pattern SKY_TRAIN_ = CleanUtils.cleanWords("skytrain");
@@ -142,6 +93,11 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 		routeLongName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, routeLongName, getIgnoredWords());
 		routeLongName = SKY_TRAIN_.matcher(routeLongName).replaceAll(EMPTY);
 		return CleanUtils.cleanLabel(routeLongName);
+	}
+
+	@Override
+	public boolean defaultAgencyColorEnabled() {
+		return true;
 	}
 
 	private static final String AGENCY_COLOR_BLUE = "0761A5"; // BLUE (merge)
@@ -156,18 +112,17 @@ public class VancouverTransLinkTrainAgencyTools extends DefaultAgencyTools {
 
 	@Nullable
 	@Override
-	public String getRouteColor(@NotNull GRoute gRoute) {
-		if (StringUtils.isEmpty(gRoute.getRouteColor())) {
-			if (isRoute(gRoute, RSN_CANADA_LINE)) {
-				return CANADA_LINE_COLOR;
-			} else if (isRoute(gRoute, RSN_MILLENNIUM_LINE)) {
-				return MILLENNIUM_LINE_COLOR;
-			} else if (isRoute(gRoute, RSN_EXPO_LINE)) {
-				return EXPO_LINE_COLOR;
-			}
-			throw new MTLog.Fatal("Unexpected route color " + gRoute);
+	public String provideMissingRouteColor(@NotNull GRoute gRoute) {
+		final String routeLongName = gRoute.getRouteLongNameOrDefault().toLowerCase(getFirstLanguageNN());
+		switch (routeLongName) {
+		case "canada line":
+			return "0098C9"; // (from PDF)
+		case "millennium line":
+			return "FDD005"; // (from PDF)
+		case "expo line":
+			return "1D59AF"; // (from PDF)
 		}
-		return super.getRouteColor(gRoute);
+		return super.provideMissingRouteColor(gRoute);
 	}
 
 	@Override
